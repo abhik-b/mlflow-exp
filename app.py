@@ -14,6 +14,9 @@ import mlflow
 import mlflow.sklearn
 from mlflow.models import infer_signature
 
+import dagshub
+dagshub.init(repo_owner='abhik-b', repo_name='mlflow-exp', mlflow=True)
+
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
 
@@ -53,6 +56,10 @@ if __name__ == "__main__":
     l1_ratio = float(sys.argv[2]) if len(sys.argv) > 2 else 0.5
 
     with mlflow.start_run():
+        # dagshub code
+        mlflow.log_param('parameter name', 'value')
+        mlflow.log_metric('metric name', 1)
+
         lr = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, random_state=42)
         lr.fit(train_x, train_y)
 
@@ -73,6 +80,10 @@ if __name__ == "__main__":
 
         predictions = lr.predict(train_x)
         signature = infer_signature(train_x, predictions)
+
+        # for remote server
+        remote_server_uri = 'https://dagshub.com/abhik-b/mlflow-exp.mlflow'
+        mlflow.set_tracking_uri(remote_server_uri)
 
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
 
